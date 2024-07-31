@@ -79,25 +79,25 @@ func (lc *LibraryController) ReturnBook() {
 
 	err := lc.libraryService.ReturnBook(bookID, memberID)
 	if err != nil {
-		fmt.Printf("\n❌ Error: %s\n\n", err)
-	} else {
-		fmt.Println("\n✅ Book returned successfully!\n")
-	}
-}
+        fmt.Printf("\n❌ Error: %s\n\n", err)
+        } else {
+            fmt.Println("\n✅ Book returned successfully!\n")
+        }
+    }
+    func (lc *LibraryController) ListAvailableBooks() {
+        books := lc.libraryService.ListAvailableBooks()
+        if len(books) == 0 {
+            fmt.Println("\nNo available books at the moment.\n")
+            return
+        }
+    
+        fmt.Println("\n📚 Available Books:")
+        for _, book := range books {
+            fmt.Printf("- ID: %d, Title: \"%s\", Author: %s\n", book.ID, book.Title, book.Author)
+        }
+        fmt.Println()
+    }
 
-func (lc *LibraryController) ListAvailableBooks() {
-	books := lc.libraryService.ListAvailableBooks()
-	if len(books) == 0 {
-		fmt.Println("\nNo available books at the moment.\n")
-		return
-	}
-
-	fmt.Println("\n📚 Available Books:")
-	for _, book := range books {
-		fmt.Printf("- ID: %d, Title: \"%s\", Author: %s\n", book.ID, book.Title, book.Author)
-	}
-	fmt.Println()
-}
 
 func (lc *LibraryController) ListBorrowedBooks() {
 	scanner := bufio.NewScanner(os.Stdin)

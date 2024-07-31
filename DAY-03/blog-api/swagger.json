@@ -1,0 +1,99 @@
+{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "http"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "title": "Blog API.",
+    "version": "1.0.0"
+  },
+  "host": "localhost:8080",
+  "basePath": "/",
+  "paths": {
+    "/blogs": {
+      "get": {
+        "tags": [
+          "blogs"
+        ],
+        "summary": "GetBlogs returns all blogs.",
+        "operationId": "getBlogs",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/successResponse"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "blogs"
+        ],
+        "summary": "CreateBlog creates a new blog and returns it.",
+        "operationId": "createBlog",
+        "responses": {
+          "201": {
+            "$ref": "#/responses/successResponse"
+          },
+          "400": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
+      }
+    },
+    "/blogs/{id}": {
+      "get": {
+        "tags": [
+          "blogs"
+        ],
+        "summary": "GetBlog returns a blog by its ID.",
+        "operationId": "getBlog",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/successResponseR"
+          },
+          "400": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "blogs"
+        ],
+        "summary": "UpdateBlog updates a blog by its ID.",
+        "operationId": "updateBlog",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/successResponse"
+          },
+          "400": {
+            "$ref": "#/responses/errorResponse"
+          },
+          "404": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "blogs"
+        ],
+        "summary": "DeleteBlog deletes a blog by its ID.",
+        "operationId": "deleteBlog",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/successResponse"
+          },
+          "404": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
+      }
+    }
+  }
+}
