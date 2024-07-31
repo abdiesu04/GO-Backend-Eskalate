@@ -34,7 +34,7 @@ func (lc *LibraryController) AddBook() {
 
 	book := models.Book{ID: bookID, Title: title, Author: author, Status: "Available"}
 	lc.libraryService.AddBook(book)
-	fmt.Println("\n✅ Book added successfully!\n")
+	fmt.Println("\n Book added successfully!\n")
 }
 
 func (lc *LibraryController) RemoveBook() {
@@ -45,9 +45,9 @@ func (lc *LibraryController) RemoveBook() {
 
 	err := lc.libraryService.RemoveBook(bookID)
 	if err != nil {
-		fmt.Printf("\n❌ Error: %s\n\n", err)
+		fmt.Printf("\n Error: %s\n\n", err)
 	} else {
-		fmt.Println("\n✅ Book removed successfully!\n")
+		fmt.Println("\n Book removed successfully!\n")
 	}
 }
 
@@ -62,9 +62,9 @@ func (lc *LibraryController) BorrowBook() {
 
 	err := lc.libraryService.BorrowBook(bookID, memberID)
 	if err != nil {
-		fmt.Printf("\n❌ Error: %s\n\n", err)
+		fmt.Printf("\n Error: %s\n\n", err)
 	} else {
-		fmt.Println("\n✅ Book borrowed successfully!\n")
+		fmt.Println("\n Book borrowed successfully!\n")
 	}
 }
 
@@ -79,9 +79,9 @@ func (lc *LibraryController) ReturnBook() {
 
 	err := lc.libraryService.ReturnBook(bookID, memberID)
 	if err != nil {
-		fmt.Printf("\n❌ Error: %s\n\n", err)
+		fmt.Printf("\n Error: %s\n\n", err)
 	} else {
-		fmt.Println("\n✅ Book returned successfully!\n")
+		fmt.Println("\n Book returned successfully!\n")
 	}
 }
 
@@ -92,7 +92,7 @@ func (lc *LibraryController) ListAvailableBooks() {
 		return
 	}
 
-	fmt.Println("\n📚 Available Books:")
+	fmt.Println("\n Available Books:")
 	for _, book := range books {
 		fmt.Printf("- ID: %d, Title: \"%s\", Author: %s\n", book.ID, book.Title, book.Author)
 	}
@@ -111,7 +111,7 @@ func (lc *LibraryController) ListBorrowedBooks() {
 		return
 	}
 
-	fmt.Println("\n📚 Borrowed Books:")
+	fmt.Println("\n Borrowed Books:")
 	for _, book := range books {
 		fmt.Printf("- ID: %d, Title: \"%s\", Author: %s\n", book.ID, book.Title, book.Author)
 	}
