@@ -1,54 +1,70 @@
 package data
 
 import (
+    "context"
     "task_manager/models"
-    "errors"
+
+    "go.mongodb.org/mongo-driver/bson"
+    "go.mongodb.org/mongo-driver/mongo"
+    "go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var tasks []models.Task = []models.Task{
-    {ID: 1, Title: "Task 1", Description: "Description 1", DueDate: "2023-10-01", Status: "pending"},
-    {ID: 2, Title: "Task 2", Description: "Description 2", DueDate: "2023-10-02", Status: "in-progress"},
-    {ID: 3, Title: "Task 3", Description: "Description 3", DueDate: "2023-10-03", Status: "completed"},
-}
-var nextID int = 4
-
-func GetTasks() []models.Task {
-    return tasks
+type TaskService struct {
+    collection *mongo.Collection
 }
 
-func GetTaskByID(id int) (*models.Task, error) {
-    for _, task := range tasks {
-        if task.ID == id {
-            return &task, nil
-        }
+func NewTaskService(collection *mongo.Collection) *TaskService {
+    return &TaskService{
+        collection: collection}
+}
+
+func (s *TaskService) GetTasks(ctx context.Context) ([]models.Task, error) {
+    cursor, err := s.collection.Find(ctx, bson.M{})
+    if err != nil {
+        return nil, err
     }
-    return nil, errors.New("task not found")
-}
-
-func CreateTask(task models.Task) models.Task {
-    task.ID = nextID
-    nextID++
-    tasks = append(tasks, task)
-    return task
-}
-
-func UpdateTask(id int, updatedTask models.Task) (*models.Task, error) {
-    for i, task := range tasks {
-        if task.ID == id {
-            tasks[i] = updatedTask
-            tasks[i].ID = id
-            return &tasks[i], nil
-        }
+    var tasks []models.Task
+    if err = cursor.All(ctx, &tasks); err != nil {
+        return nil, err
     }
-    return nil, errors.New("task not found")
+    return tasks, nil
 }
 
-func DeleteTask(id int) error {
-    for i, task := range tasks {
-        if task.ID == id {
-            tasks = append(tasks[:i], tasks[i+1:]...)
-            return nil
-        }
+func (s *TaskService) GetTaskByID(ctx context.Context, id int) (models.Task, error) {
+    var task models.Task
+    if err := s.collection.FindOne(ctx, bson.M{"id": id}).Decode(&task); err != nil {
+        return task, err
     }
-    return errors.New("task not found")
+    return task, nil
+}
+
+func (s *TaskService) CreateTask(ctx context.Context, task models.Task) (models.Task, error) {
+    // Generate a new integer ID (this is a simple example, you might want to use a more robust method)
+    var lastTask models.Task
+    err := s.collection.FindOne(ctx, bson.M{}, options.FindOne().SetSort(bson.D{{"id", -1}})).Decode(&lastTask)
+    if err != nil && err != mongo.ErrNoDocuments {
+        return task, err
+    }
+    task.ID = lastTask.ID + 1
+
+    _, err = s.collection.InsertOne(ctx, task)
+    if err != nil {
+        return task, err
+    }
+    return task, nil
+}
+
+func (s *TaskService) UpdateTask(ctx context.Context, id int, updatedTask models.Task) (models.Task, error) {
+    update := bson.M{"$set": updatedTask}
+    _, err := s.collection.UpdateOne(ctx, bson.M{"id": id}, update)
+    if err != nil {
+        return updatedTask, err
+    }
+    updatedTask.ID = id
+    return updatedTask, nil
+}
+
+func (s *TaskService) DeleteTask(ctx context.Context, id int) error {
+    _, err := s.collection.DeleteOne(ctx, bson.M{"id": id})
+    return err
 }
