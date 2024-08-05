@@ -8,8 +8,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+
 type UserService struct {
-    Collection *mongo.Collection
+    Collection *mongo.Collection // MongoDB collection for users
 }
 
 func (s *UserService) CreateUser(user *models.User) error {
