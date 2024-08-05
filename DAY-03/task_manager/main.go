@@ -2,52 +2,52 @@ package main
 
 import (
     "context"
-    "fmt"
     "log"
     "task_manager/router"
-    "time"
-
-    "go.mongodb.org/mongo-driver/bson"
     "go.mongodb.org/mongo-driver/mongo"
     "go.mongodb.org/mongo-driver/mongo/options"
+    "go.mongodb.org/mongo-driver/mongo/readpref"
+    "github.com/joho/godotenv"
+    "os"
+    "time"
 )
 
+
+// main connects to the database, sets up the router, and starts the server.
 func main() {
-    // Define MongoDB connection options
-    opts := options.Client().ApplyURI("mongodb://localhost:27017")
-
-    var client *mongo.Client
-    var err error
-
-    // Implement a retry mechanism for connecting to MongoDB
-    for i := 0; i < 5; i++ {
-        client, err = mongo.Connect(context.TODO(), opts)
-        if err == nil {
-            // Ping the MongoDB server to ensure a successful connection
-            err = client.Database("admin").RunCommand(context.TODO(), bson.D{{Key: "ping", Value: 1}}).Err()
-            if err == nil {
-                fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
-                break
-            }
-        }
-        log.Printf("Failed to connect to MongoDB (attempt %d/5): %v", i+1, err)
-        time.Sleep(2 * time.Second)
-    }
-
+    // Set up the MongoDB client
+    err := godotenv.Load(".env")
     if err != nil {
-        log.Fatalf("Failed to connect to MongoDB after 5 attempts: %v", err)
+        log.Fatalf("Error loading .env file")
+    }
+    mongoURL := os.Getenv("MONGO_URL")
+    client, err := mongo.NewClient(options.Client().ApplyURI(mongoURL))
+    if err != nil {
+        log.Fatal(err)
     }
 
-    defer func() {
-        if err := client.Disconnect(context.TODO()); err != nil {
-            log.Fatal(err)
-        }
-    }()
+    // Create a context with a timeout of 10 seconds
+    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+    defer cancel() // Cancel the context when the function exits
+    
+    // Connect to the MongoDB server
+    err = client.Connect(ctx)
+    if err != nil {
+        log.Fatal(err)
+    }
 
-    // Get the task collection
-    taskCollection := client.Database("taskdb").Collection("tasks")
+    // Ping the primary to check the connection
+    err = client.Ping(ctx, readpref.Primary())
+    if err != nil {
+        log.Fatal(err)
+    }
 
-    // Set up and run the router
-    r := router.SetupRouter(taskCollection)
+    // Get collections from the database for task  and users 
+    taskCollection := client.Database("task_manager_db").Collection("tasks")
+    userCollection := client.Database("task_manager_db").Collection("users")
+
+    // Set up the router
+    r := router.SetupRouter(taskCollection, userCollection)
+
     r.Run(":8080")
 }
