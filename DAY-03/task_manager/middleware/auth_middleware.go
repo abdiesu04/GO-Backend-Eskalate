@@ -9,12 +9,22 @@ import (
 
 var jwtKey = []byte("task_manager_jwt_secret_key")
 
+// Claims struct to include role
+type Claims struct {
+    Username string `json:"username"`
+    Role     string `json:"role"`
+    jwt.StandardClaims
+}
+
 // GenerateJWT generates a new JWT token with username and role claims
 func GenerateJWT(username string, role string) (string, error) {
     expirationTime := time.Now().Add(24 * time.Hour)
-    claims := &jwt.StandardClaims{
-        Subject:   username,
-        ExpiresAt: expirationTime.Unix(),
+    claims := &Claims{
+        Username: username,
+        Role:     role,
+        StandardClaims: jwt.StandardClaims{
+            ExpiresAt: expirationTime.Unix(),
+        },
     }
     token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
     tokenString, err := token.SignedString(jwtKey)
@@ -39,7 +49,7 @@ func AuthMiddleware() gin.HandlerFunc {
             tokenString = tokenString[7:]
         }
 
-        token, err := jwt.ParseWithClaims(tokenString, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+        token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
             // Verify the token's signing method
             if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
                 return nil, jwt.ErrSignatureInvalid
@@ -54,14 +64,27 @@ func AuthMiddleware() gin.HandlerFunc {
         }
 
         // Set token claims in context
-        claims, ok := token.Claims.(*jwt.StandardClaims)
+        claims, ok := token.Claims.(*Claims)
         if !ok || !token.Valid {
             c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
             c.Abort()
             return
         }
-        
-        c.Set("username", claims.Subject)
+
+        c.Set("username", claims.Username)
+        c.Set("role", claims.Role)
+        c.Next()
+    }
+}
+
+// RoleMiddleware checks if the user has the required role.
+func RoleMiddleware(requiredRole string) gin.HandlerFunc {
+    return func(c *gin.Context) {
+        role, exists := c.Get("role")
+        if !exists || role != requiredRole {
+            c.AbortWithStatus(http.StatusForbidden)
+            return
+        }
         c.Next()
     }
 }

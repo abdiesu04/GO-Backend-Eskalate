@@ -8,7 +8,6 @@ import (
     "go.mongodb.org/mongo-driver/mongo"
 )
 
-
 func SetupRouter(taskCollection *mongo.Collection, userCollection *mongo.Collection) *gin.Engine {
     r := gin.Default()
 
@@ -29,17 +28,21 @@ func SetupRouter(taskCollection *mongo.Collection, userCollection *mongo.Collect
 
     // Group authorized endpoints.
     authorized := r.Group("/")
-
-    // Require authentication for authorized endpoints.
     authorized.Use(middleware.AuthMiddleware())
 
     // Register API endpoints for task management.
     {
-        authorized.POST("/tasks", controllers.NewTaskController(taskService).CreateTask)
         authorized.GET("/tasks", controllers.NewTaskController(taskService).GetTasks)
         authorized.GET("/tasks/:id", controllers.NewTaskController(taskService).GetTaskByID)
-        authorized.PUT("/tasks/:id", controllers.NewTaskController(taskService).UpdateTask)
-        authorized.DELETE("/tasks/:id", controllers.NewTaskController(taskService).DeleteTask)
+    }
+
+    // Admin-only endpoints.
+    admin := authorized.Group("/")
+    admin.Use(middleware.RoleMiddleware("admin"))
+    {
+        admin.POST("/admin/tasks", controllers.NewTaskController(taskService).CreateTask)
+        admin.PUT("/admin/tasks/:id", controllers.NewTaskController(taskService).UpdateTask)
+        admin.DELETE("/admin/tasks/:id", controllers.NewTaskController(taskService).DeleteTask)
     }
 
     // Return the configured router.
