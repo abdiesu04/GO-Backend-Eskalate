@@ -12,10 +12,9 @@ var jwtKey = []byte("task_manager_jwt_secret_key")
 // GenerateJWT generates a new JWT token with username and role claims
 func GenerateJWT(username string, role string) (string, error) {
     expirationTime := time.Now().Add(24 * time.Hour)
-    claims := &jwt.MapClaims{
-        "username": username,
-        "role": role,
-        "exp": expirationTime.Unix(),
+    claims := &jwt.StandardClaims{
+        Subject:   username,
+        ExpiresAt: expirationTime.Unix(),
     }
     token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
     tokenString, err := token.SignedString(jwtKey)
