@@ -16,7 +16,13 @@ type UserService struct {
 
 // CreateUser inserts a new user into the MongoDB collection
 func (s *UserService) CreateUser(user *models.User) error {
-	_, err := s.Collection.InsertOne(context.TODO(), user)
+	var existingUser models.User
+	err := s.Collection.FindOne(context.TODO(), bson.M{"username": user.Username}).Decode(&existingUser)
+	if err == nil {
+		return err
+	}
+
+	_, err = s.Collection.InsertOne(context.TODO(), user)
 	return err
 }
 
