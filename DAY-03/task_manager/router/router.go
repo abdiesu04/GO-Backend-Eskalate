@@ -40,6 +40,7 @@ func SetupRouter(taskCollection *mongo.Collection, userCollection *mongo.Collect
     authorized.POST("/tasks", middleware.RoleMiddleware("admin"), controllers.NewTaskController(taskService).CreateTask)
     authorized.PUT("/tasks/:id", middleware.RoleMiddleware("admin"), controllers.NewTaskController(taskService).UpdateTask)
     authorized.DELETE("/tasks/:id", middleware.RoleMiddleware("admin"), controllers.NewTaskController(taskService).DeleteTask)
+    authorized.POST("promote/:username", middleware.RoleMiddleware("admin"), controllers.NewTaskController(taskService).PromoteAdmin)
 
     // Return the configured router.
     return r

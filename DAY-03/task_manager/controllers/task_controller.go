@@ -109,6 +109,11 @@ func Register(c *gin.Context) {
         return
     }
 
+    // Set the role to "user" by default
+    if user.Role == "" {
+        user.Role = "user"
+    }
+
     hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
@@ -156,4 +161,31 @@ func Login(c *gin.Context) {
     }
 
     c.JSON(http.StatusOK, gin.H{"token": token})
+}
+
+// PromoteAdmin promotes a user to an admin role
+func (ctrl *TaskController) PromoteAdmin(c *gin.Context) {
+    username := c.Param("username")
+    log.Printf("PromoteAdmin called with username: %s", username) 
+
+    userService := c.MustGet("userService").(*data.UserService)
+    
+    // Retrieve the user by username
+    user, err := userService.GetUserByUsername(username)
+    if err != nil {
+        log.Printf("Error retrieving user: %v", err)
+        c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+        return
+    }
+    log.Printf("User found: %+v", user) 
+
+    // Update the user's role to "admin"
+    err = userService.UpdateUserRole(context.Background(), username, "admin")
+    if err != nil {
+        log.Printf("Error promoting user to admin: %v", err)
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"message": "User promoted to admin successfully"})
 }
