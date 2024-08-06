@@ -36,14 +36,10 @@ func SetupRouter(taskCollection *mongo.Collection, userCollection *mongo.Collect
         authorized.GET("/tasks/:id", controllers.NewTaskController(taskService).GetTaskByID)
     }
 
-    // Admin-only endpoints.
-    admin := authorized.Group("/")
-    admin.Use(middleware.RoleMiddleware("admin"))
-    {
-        admin.POST("/admin/tasks", controllers.NewTaskController(taskService).CreateTask)
-        admin.PUT("/admin/tasks/:id", controllers.NewTaskController(taskService).UpdateTask)
-        admin.DELETE("/admin/tasks/:id", controllers.NewTaskController(taskService).DeleteTask)
-    }
+    // Admin-only task management endpoints
+    authorized.POST("/tasks", middleware.RoleMiddleware("admin"), controllers.NewTaskController(taskService).CreateTask)
+    authorized.PUT("/tasks/:id", middleware.RoleMiddleware("admin"), controllers.NewTaskController(taskService).UpdateTask)
+    authorized.DELETE("/tasks/:id", middleware.RoleMiddleware("admin"), controllers.NewTaskController(taskService).DeleteTask)
 
     // Return the configured router.
     return r
