@@ -166,11 +166,9 @@ func Login(c *gin.Context) {
 // PromoteAdmin promotes a user to an admin role
 func (ctrl *TaskController) PromoteAdmin(c *gin.Context) {
     username := c.Param("username")
-    log.Printf("PromoteAdmin called with username: %s", username) 
 
     userService := c.MustGet("userService").(*data.UserService)
     
-    // Retrieve the user by username
     user, err := userService.GetUserByUsername(username)
     if err != nil {
         log.Printf("Error retrieving user: %v", err)
@@ -179,10 +177,8 @@ func (ctrl *TaskController) PromoteAdmin(c *gin.Context) {
     }
     log.Printf("User found: %+v", user) 
 
-    // Update the user's role to "admin"
     err = userService.UpdateUserRole(context.Background(), username, "admin")
     if err != nil {
-        log.Printf("Error promoting user to admin: %v", err)
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
         return
     }
