@@ -4,6 +4,7 @@ import (
 	"context"
 	"strconv"
 	"task_manager/domain"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -11,10 +12,10 @@ import (
 
 type TaskRepository interface {
 	CreateTask(ctx context.Context, task *domain.Task) error
-    GetAllTasks(ctx context.Context) ([]domain.Task, error)
-    GetTaskByID(ctx context.Context, id string) (*domain.Task, error)
-    UpdateTask(ctx context.Context, id string, updatedTask *domain.Task) error
-    DeleteTask(ctx context.Context, id string) error
+	GetAllTasks(ctx context.Context) ([]domain.Task, error)
+	GetTaskByID(ctx context.Context, id string) (*domain.Task, error)
+	UpdateTask(ctx context.Context, id string, updatedTask *domain.Task) error
+	DeleteTask(ctx context.Context, id string) error
 }
 
 type taskRepository struct {
@@ -31,8 +32,8 @@ func NewTaskRepository(db *mongo.Database) TaskRepository {
 
 // getNextID generates a new incremented string ID
 func (r *taskRepository) getNextID(ctx context.Context) (string, error) {
-	filter := bson.D{{"_id", "task_id"}}
-	update := bson.D{{"$inc", bson.D{{"seq", 1}}}}
+	filter := bson.D{{Key: "_id", Value: "task_id"}}
+	update := bson.D{{Key: "$inc", Value: bson.D{{Key: "seq", Value: 1}}}}
 	opts := options.FindOneAndUpdate().SetUpsert(true).SetReturnDocument(options.After)
 
 	var result struct {
@@ -85,7 +86,7 @@ func (r *taskRepository) GetTaskByID(ctx context.Context, id string) (*domain.Ta
 }
 
 func (r *taskRepository) UpdateTask(ctx context.Context, id string, updatedTask *domain.Task) error {
-	filter := bson.D{{"_id", id}}
+	filter := bson.D{{Key: "_id", Value: id}}
 	update := bson.D{
 		{Key: "$set", Value: bson.D{
 			{Key: "title", Value: updatedTask.Title},
