@@ -47,3 +47,14 @@ func (c *UserController) Login(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, gin.H{"token": token})
 }
+
+// PromoteToAdmin handles promoting a user to admin
+func (c *UserController) PromoteAdmin(ctx *gin.Context) {
+	username := ctx.Param("username")
+	err := c.UserUsecase.PromoteAdmin(ctx, username)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message": "User promoted to admin successfully"})
+}

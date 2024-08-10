@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"log"
-	"task_manager/delivery/controllers"
-	"task_manager/delivery/routers"
+	"task_manager/Delivery/controllers"
+	"task_manager/Delivery/routers"
 	"task_manager/repositories"
 	"task_manager/usecases"
 	"time"
@@ -44,7 +44,6 @@ func main() {
 	// Initialize controllers
 	taskController := controllers.NewTaskController(taskUsecase)
 	userController := controllers.NewUserController(userUsecase)
-
 	// Setup router and start server
 	router := routers.SetupRouter(taskController, userController)
 	if err := router.Run(":8080"); err != nil {
