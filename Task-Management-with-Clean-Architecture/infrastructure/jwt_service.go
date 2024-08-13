@@ -8,14 +8,12 @@ import (
 
 var jwtKey = []byte("task_manager_jwt_secret_key")
 
-// Claims struct to include role
 type Claims struct {
 	Username string `json:"username"`
 	Role     string `json:"role"`
 	jwt.StandardClaims
 }
 
-// GenerateJWT generates a new JWT token with username and role claims
 func GenerateJWT(username string, role string) (string, error) {
 	expirationTime := time.Now().Add(24 * time.Hour)
 	claims := &Claims{

@@ -59,18 +59,15 @@ func (u *userUsecase) Register(ctx context.Context, user *domain.User) error {
 }
 
 func (u *userUsecase) Login(ctx context.Context, user *domain.User) (string, error) {
-	// Get the stored password from the repository
 	storedPassword, err := u.UserRepository.GetPasswrodByUsername(ctx, user.Username)
 	if err != nil {
 		return "", err
 	}
 
-	// Compare provided password with stored hashed password
 	if !infrastructure.ComparePassword(storedPassword, user.Password) {
 		return "", errors.New("invalid username or password")
 	}
 
-	// Generate token
 	token, err := infrastructure.GenerateJWT(user.Username, user.Role)
 	if err != nil {
 		return "", err

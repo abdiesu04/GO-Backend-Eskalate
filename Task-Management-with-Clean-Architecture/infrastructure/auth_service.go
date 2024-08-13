@@ -8,7 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// RoleMiddleware enforces role-based access control
 func RoleMiddleware(requiredRole string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		role, exists := c.Get("role")
@@ -23,21 +22,17 @@ func RoleMiddleware(requiredRole string) gin.HandlerFunc {
 // AuthMiddleware validates the JWT token and extracts claims
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Retrieve the Authorization header
 		tokenString := c.GetHeader("Authorization")
 		if tokenString == "" {
-			// If there's no token, return an unauthorized status
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header missing"})
 			c.Abort()
 			return
 		}
 
-		// If token has "Bearer " prefix, strip it
 		if strings.HasPrefix(tokenString, "Bearer ") {
 			tokenString = tokenString[7:]
 		}
 
-		// Parse the token and validate it
 		token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, jwt.ErrSignatureInvalid
@@ -51,7 +46,6 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Extract claims and set them in the context
 		claims, ok := token.Claims.(*Claims)
 		if !ok || !token.Valid {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})

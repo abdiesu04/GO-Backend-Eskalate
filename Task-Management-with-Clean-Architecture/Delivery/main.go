@@ -44,7 +44,7 @@ func main() {
 	// Initialize controllers
 	taskController := controllers.NewTaskController(taskUsecase)
 	userController := controllers.NewUserController(userUsecase)
-	// Setup router and start server
+	// Setup router and stat server
 	router := routers.SetupRouter(taskController, userController)
 	if err := router.Run(":8080"); err != nil {
 		log.Fatalf("Failed to start the server: %v", err)

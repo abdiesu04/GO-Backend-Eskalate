@@ -30,7 +30,6 @@ func NewTaskRepository(db *mongo.Database) TaskRepository {
 	}
 }
 
-// getNextID generates a new incremented string ID
 func (r *taskRepository) getNextID(ctx context.Context) (string, error) {
 	filter := bson.D{{Key: "_id", Value: "task_id"}}
 	update := bson.D{{Key: "$inc", Value: bson.D{{Key: "seq", Value: 1}}}}

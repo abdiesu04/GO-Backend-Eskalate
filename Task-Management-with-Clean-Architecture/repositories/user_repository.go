@@ -8,7 +8,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// UserRepository defines methods to interact with the user data.
 type UserRepository interface {
 	CreateUser(ctx context.Context, user *domain.User) error
 	GetUserByUsername(ctx context.Context, username string) (*domain.User, error)
@@ -22,20 +21,17 @@ type userRepository struct {
 	collection *mongo.Collection
 }
 
-// NewUserRepository creates a new UserRepository.
 func NewUserRepository(db *mongo.Database) UserRepository {
 	return &userRepository{
 		collection: db.Collection("users"),
 	}
 }
 
-// CreateUser inserts a new user into the MongoDB collection.
 func (r *userRepository) CreateUser(ctx context.Context, user *domain.User) error {
 	_, err := r.collection.InsertOne(ctx, user)
 	return err
 }
 
-// GetUserByUsername retrieves a user by username from MongoDB.
 func (r *userRepository) GetUserByUsername(ctx context.Context, username string) (*domain.User, error) {
 	var user domain.User
 	err := r.collection.FindOne(ctx, bson.M{"username": username}).Decode(&user)
@@ -45,7 +41,6 @@ func (r *userRepository) GetUserByUsername(ctx context.Context, username string)
 	return &user, nil
 }
 
-// PromoteAdmin updates the role of a user to "admin".
 func (r *userRepository) PromoteAdmin(ctx context.Context, username string) error {
 	filter := bson.D{{Key: "username", Value: username}}
 	update := bson.D{{Key: "$set", Value: bson.D{{Key: "role", Value: "admin"}}}}
